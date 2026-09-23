@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
-
+import 'dart:math';
+//Clarence Li(002864968), Nick Camplone(002647881)
+//ACTIVITY 04
+//TEAM DOLPHIN
+//
+//
 // ============================================================================
 // 1. MAIN ENTRY POINT
 // ============================================================================
@@ -69,15 +74,53 @@ class ControlDeckScreen extends StatefulWidget {
 
 class _ControlDeckScreenState extends State<ControlDeckScreen> {
   // --- Mutable State Variables ---
-  int totalEnergy = 100;             
+  int totalEnergy = 100; 
+  int rescues = 0;
+  double chargeLevel = 0;
+  bool shieldActive = false;           
   double powerLevel = 65.0;      // Controlled by the interactive slider
-  String systemStatus = "READY"; // Displays latest activated command
+  String systemStatus = "ON PATROL"; // Displays latest activated command
 
   // Helper method to update dashboard state upon button press
   void _triggerAction(String actionName) {
     setState(() {
-      totalEnergy -= 25;
-      systemStatus = "$actionName ACTIVATED";
+
+      if(totalEnergy - 25 >= 0){
+        totalEnergy -= 25;
+        systemStatus = "$actionName ACTIVATED";
+      }
+      else{
+        systemStatus = "Not Enough Energy";
+      }
+      
+    });
+  }
+  void _triggerForce(String actionName) {
+    setState(() {
+      if(totalEnergy - 15 >= 0){
+        totalEnergy -= 15;
+        systemStatus = "$actionName ACTIVATED";
+      }
+      else{
+        systemStatus = "Not Enough Energy";
+      }
+      
+    });
+  }
+  void _triggerRescue(String actionName) {
+    setState(() {
+      rescues++;
+      if(rescues >= 3){
+        systemStatus = "CITY SAVED";
+      }
+      else{
+        systemStatus = "$actionName ACTIVATED";
+      }
+    });
+  }
+  void _triggerRecharge(String actionName){
+    setState(() {
+      totalEnergy = min(totalEnergy+100, 100);
     });
   }
 
@@ -141,7 +184,7 @@ class _ControlDeckScreenState extends State<ControlDeckScreen> {
                   // Energy / Power Level Indicator
                   Column(
                     children: [
-                      const Text("ENERGY LEVEL", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
+                      const Text("CHARGE LEVEL", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
                       const SizedBox(height: 4),
                       Text("${powerLevel.toInt()}%", style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.blueAccent)),
                     ],
@@ -171,7 +214,7 @@ class _ControlDeckScreenState extends State<ControlDeckScreen> {
                 TactileButton(
                   icon: Icons.visibility,
                   label: "LASER BLAST",
-                  accentColor: Colors.amber,
+                  accentColor: Colors.red,
                   isDark: widget.isDark,
                   onPressed: () => _triggerAction("LASER BLAST"),
                 ),
@@ -180,21 +223,21 @@ class _ControlDeckScreenState extends State<ControlDeckScreen> {
                   label: "FORCEFIELD",
                   accentColor: Colors.tealAccent,
                   isDark: widget.isDark,
-                  onPressed: () => _triggerAction("FORCEFIELD"),
+                  onPressed: () => _triggerForce("FORCEFIELD"),
                 ),
                 TactileButton(
                   icon: Icons.wifi_tethering,
                   label: "RESCUE",
                   accentColor: Colors.purpleAccent,
                   isDark: widget.isDark,
-                  onPressed: () => _triggerAction("RESCUE"),
+                  onPressed: () => _triggerRescue("RESCUE"),
                 ),
                 TactileButton(
                   icon: Icons.flash_on,
                   label: "RECHARGE",
                   accentColor: Colors.redAccent,
                   isDark: widget.isDark,
-                  onPressed: () => _triggerAction("RECHARGE"),
+                  onPressed: () => _triggerRecharge("RECHARGE"),
                 ),
               ],
             ),
@@ -202,7 +245,7 @@ class _ControlDeckScreenState extends State<ControlDeckScreen> {
 
             // --- INTERACTIVE CALIBRATION SLIDER ---
             Text(
-              "Power Calibration: ${powerLevel.toInt()}%",
+              "CHARGE LEVEL: ${powerLevel.toInt()}%",
               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
             ),
             Slider(
